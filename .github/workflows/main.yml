@@ -57,7 +57,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Deploy to production
-        run: docker-compose up --build -d
+        run: docker-compose down && docker-compose up -d
 
   deploy:
     name: Deploy on EC2
@@ -76,5 +76,4 @@ jobs:
           REMOTE_USER: ${{ secrets.USERNAME }}
           TARGET: ${{ secrets.TARGET_DIR }}
 
-      - name: Deploy to production
-        run: docker-compose up --build -d
+     
