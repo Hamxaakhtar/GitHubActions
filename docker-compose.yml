@@ -1,9 +1,8 @@
 
-version: '3'
+version: '3.3'
 
 services:
-  django:
-    image: django:latest
+  web:
+    image: "django/django:latest
     ports:
       - "8000:8000"
-    restart: always
