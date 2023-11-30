@@ -2,9 +2,6 @@ version: '3'
 
 services:
   myapp:
-    build:
-      context: .
-      dockerfile: Dockerfile
     image: myapp-image
     ports:
       - "8000:8000"
