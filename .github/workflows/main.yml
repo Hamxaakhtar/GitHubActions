@@ -9,7 +9,7 @@ jobs:
   deploy:
     name: Deploy on EC2
     runs-on: ubuntu-latest
-    needs: build
+  
 
     steps:
       - name: Checkout the files
