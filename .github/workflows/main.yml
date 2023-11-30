@@ -75,4 +75,5 @@ jobs:
 
       - name: Deploy to production
         run: |
+          cd /home/ubuntu/home
           docker-compose up --build -d
