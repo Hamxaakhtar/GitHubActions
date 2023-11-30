@@ -24,5 +24,5 @@ jobs:
 
       - name: Deploy to production
         run: |
-          docker-compose up --build -d
+          docker build -t myapp-image && docker-compose up -d
 
