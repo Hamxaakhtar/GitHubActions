@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Docker Image CI
 
 on:
   push:
@@ -6,38 +6,38 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-
+  push_to_registry_of_student:
+    name: Push Docker image to Docker Hub and Deploy
+    runs-on: ubuntu-20.04
+    
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v1
-
-    - name: Get external IP address
-      id: ip
-      run: echo "::set-output name=ip::$(curl -s ifconfig.me)"
-
-    - name: Build and push Docker image to local Docker Hub registry
-      run: |
-        DOCKER_REGISTRY_IP=$(echo ${{ steps.ip.outputs.ip }}):5000
-        DOCKER_IMAGE=$DOCKER_REGISTRY_IP/django:latest
-
-        docker buildx create --use
-        docker buildx build --platform linux/amd64,linux/arm64 -t $DOCKER_IMAGE --push .
-        
-    - name: SSH into EC2 and pull/run Docker image
-      uses: appleboy/ssh-action@master
-      with:
-        host: ${{ secrets.HOST_DNS }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.EC2_SSH_KEY }}
-        script: |
-          DOCKER_REGISTRY_IP=$(curl -s ifconfig.me):5000
-          docker pull $DOCKER_REGISTRY_IP/django:latest
-          docker-compose -f path/to/your/docker-compose.yml up -d
-
-    - name: Wait for Django app to start on EC2
-      run: sleep 10
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          tags: hamxaakhtar/django:latest
+          labels: |
+            org.opencontainers.image.description=This repo is for Django todo app deployment as a Devops engineer via Jenkins
+            org.opencontainers.image.url=https://github.com/Hamxaakhtar/django-todo-cicd
+            org.opencontainers.image.version=1.0.0  # Replace with your version
+      
+      - name: Deploy to EC2
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          HOSTNAME: ${{ secrets.EC2_PUBLIC_IP }}
+          USER_NAME: ${{ secrets.USER_NAME }}
+          
+        run: |
+          echo "$PRIVATE_KEY " > private_key && chmod 600 private_key
+          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} 'cd django-todo-cicd/ && docker-compose up --build -d'
