@@ -30,10 +30,10 @@ jobs:
     - name: SSH into EC2 and pull/run Docker image
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.EC2_HOST }}
-        username: ${{ secrets.EC2_USERNAME }}
-        key: ${{ secrets.EC2_PRIVATE_KEY }}
-        port: ${{ secrets.EC2_PORT }}
+        host: ${{ secrets.HOST_DNS }}
+        username: ${{ secrets.USERNAME }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+       
         script: |
           DOCKER_REGISTRY_IP=$(curl -s ifconfig.me):5000
           docker pull $DOCKER_REGISTRY_IP/your-django-app:latest
