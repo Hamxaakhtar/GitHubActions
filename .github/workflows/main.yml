@@ -1,4 +1,4 @@
-name: Deploy Workflow
+name: CI/CD Pipeline
 
 on:
   push:
@@ -6,26 +6,38 @@ on:
       - main
 
 jobs:
-  deploy:
-    name: Deploy on EC2
+  build:
     runs-on: ubuntu-latest
-  
 
     steps:
-      - name: Checkout the files
-        uses: actions/checkout@v2
+    - name: Checkout code
+      uses: actions/checkout@v2
 
-      - name: Deploy to Server 1
-        uses: easingthemes/ssh-deploy@main
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
-          REMOTE_HOST: ${{ secrets.HOST_DNS }}
-          REMOTE_USER: ${{ secrets.USERNAME }}
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
 
-      - name: Deploy to production
-        run: |
-          echo "$EC2_SSH_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOST_DNS} '
+    - name: Get external IP address
+      id: ip
+      run: echo "::set-output name=ip::$(curl -s ifconfig.me)"
 
-          docker build -t myapp-image . && docker-compose up -d '
+    - name: Build and push Docker image to local Docker Hub registry
+      run: |
+        DOCKER_REGISTRY_IP=$(echo ${{ steps.ip.outputs.ip }}):5000
+        docker buildx create --use
+        docker buildx build --platform linux/amd64,linux/arm64 -t $DOCKER_REGISTRY_IP/your-django-app:latest .
+        docker push $DOCKER_REGISTRY_IP/your-django-app:latest
 
+    - name: SSH into EC2 and pull/run Docker image
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USERNAME }}
+        key: ${{ secrets.EC2_PRIVATE_KEY }}
+        port: ${{ secrets.EC2_PORT }}
+        script: |
+          DOCKER_REGISTRY_IP=$(curl -s ifconfig.me):5000
+          docker pull $DOCKER_REGISTRY_IP/your-django-app:latest
+          docker-compose -f path/to/your/docker-compose.yml up -d
+
+    - name: Wait for Django app to start on EC2
+      run: sleep 10
