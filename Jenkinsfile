@@ -3,6 +3,6 @@ pipeline {
     
     stages{
         stage("Clone Code"){
-            steps {
+            st
             }
         }
