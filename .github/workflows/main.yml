@@ -24,7 +24,7 @@ jobs:
       run: |
         DOCKER_REGISTRY_IP=$(echo ${{ steps.ip.outputs.ip }}):5000
         docker buildx create --use
-        docker buildx build --platform linux/amd64,linux/arm64 -t $DOCKER_REGISTRY_IP/your-django-app:latest .
+        docker buildx build --platform linux/amd64,linux/arm64 -t $DOCKER_REGISTRY_IP/django:latest .
         docker push $DOCKER_REGISTRY_IP/your-django-app:latest
 
     - name: SSH into EC2 and pull/run Docker image
@@ -36,7 +36,7 @@ jobs:
        
         script: |
           DOCKER_REGISTRY_IP=$(curl -s ifconfig.me):5000
-          docker pull $DOCKER_REGISTRY_IP/your-django-app:latest
+          docker pull $DOCKER_REGISTRY_IP/django:latest
           docker-compose -f path/to/your/docker-compose.yml up -d
 
     - name: Wait for Django app to start on EC2
