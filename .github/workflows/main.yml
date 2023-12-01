@@ -23,17 +23,17 @@ jobs:
     - name: Build and push Docker image to local Docker Hub registry
       run: |
         DOCKER_REGISTRY_IP=$(echo ${{ steps.ip.outputs.ip }}):5000
-        docker buildx create --use
-        docker buildx build --platform linux/amd64,linux/arm64 -t $DOCKER_REGISTRY_IP/django:latest .
-        docker push $DOCKER_REGISTRY_IP/your-django-app:latest
+        DOCKER_IMAGE=$DOCKER_REGISTRY_IP/django:latest
 
+        docker buildx create --use
+        docker buildx build --platform linux/amd64,linux/arm64 -t $DOCKER_IMAGE --push .
+        
     - name: SSH into EC2 and pull/run Docker image
       uses: appleboy/ssh-action@master
       with:
         host: ${{ secrets.HOST_DNS }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.EC2_SSH_KEY }}
-       
         script: |
           DOCKER_REGISTRY_IP=$(curl -s ifconfig.me):5000
           docker pull $DOCKER_REGISTRY_IP/django:latest
