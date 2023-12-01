@@ -6,7 +6,3 @@ pipeline {
             steps {
             }
         }
-       
-                
-            }
-        }
