@@ -1,7 +1,8 @@
+
 version: '3'
 
 services:
-  myapp:
+  django:
     image: django:latest
     ports:
       - "8000:8000"
