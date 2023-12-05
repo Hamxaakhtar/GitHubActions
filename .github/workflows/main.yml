@@ -33,15 +33,12 @@ jobs:
             org.opencontainers.image.description=This repo is for Django todo app deployment as a Devops engineer via Jenkins
             org.opencontainers.image.url=https://github.com/Hamxaakhtar/GitHubActions.git
             org.opencontainers.image.version=1.0.0  # Replace with your version
-      
       - name: Deploy to EC2
-        env:
-          PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          HOSTNAME: ${{ secrets.EC2_PUBLIC_IP }}
-          USER_NAME: ${{ secrets.USER_NAME }}
+         env:
+            PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+            HOSTNAME: ${{ secrets.EC2_PUBLIC_IP }}
+            USER_NAME: ${{ secrets.USER_NAME }}
         run: |
-          echo "$PRIVATE_KEY" > private_key && chmod 600 private_key
-          ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} '
-              # Now we have got access to the EC2 and will start the deployment.
-              cd /home/ubuntu/actions-runner/_work/GitHubActions
-              docker-compose pull && docker-compose up -d'
+            echo "$PRIVATE_KEY" > private_key && chmod 600 private_key && \
+            ssh -o StrictHostKeyChecking=no -i private_key ${USER_NAME}@${HOSTNAME} 'cd /home/ubuntu/actions-runner/_work/GitHubActions && docker-compose pull && docker-compose up -d'
+
