@@ -29,10 +29,10 @@ jobs:
           context: .
           push: true
           tags: hamxaakhtar/django:latest
-          labels: |
-            org.opencontainers.image.description=This repo is for Django todo app deployment as a Devops engineer via Jenkins
-            org.opencontainers.image.url=https://github.com/Hamxaakhtar/GitHubActions.git
-            org.opencontainers.image.version=1.0.0  # Replace with your version
+          # labels: |
+          #   org.opencontainers.image.description=This repo is for Django todo app deployment as a Devops engineer via Jenkins
+          #   org.opencontainers.image.url=https://github.com/Hamxaakhtar/GitHubActions.git
+          #   org.opencontainers.image.version=1.0.0  # Replace with your version
 
       - name: Deploy to EC2
         env:
